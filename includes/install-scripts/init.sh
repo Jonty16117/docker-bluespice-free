@@ -5,6 +5,8 @@
 set -e
 
 mkdir -p /data/logs/
+exec > >(tee -i /data/logs/wiki.logs)
+exec 2>&1
 
 if [ -z $BS_DB_PASSWORD ]; then
     BS_DB_PASSWORD="ThisIsDBPassword"
