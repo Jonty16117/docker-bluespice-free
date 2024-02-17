@@ -1,25 +1,25 @@
 ## Final bluespice stage
 FROM php:8.3-fpm-bookworm
 
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
-ENV OPENSEARCH_JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+ENV OPENSEARCH_JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 
-COPY ./includes/099-Custom.php /opt/099-Custom.php
-COPY ./includes/php.ini /usr/local/etc/php/php.ini
-COPY ./includes/opcache.blacklist /usr/local/etc/php/opcache.blacklist
-COPY ./includes/my.cnf /etc/mysql/my.cnf
-COPY ./includes/bluespice.cron /etc/cron.d/bluespice
-COPY ./includes/install-scripts /opt/docker/install-scripts
-COPY ./includes/pingback.js /opt/docker/
-COPY ./includes/mysqld.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
-COPY ./includes/www.conf /usr/local/etc/php-fpm.d/www.conf
-COPY ./includes/nginx/bluespice.conf /etc/nginx/sites-available/
-COPY ./includes/nginx/bluespice-ssl.conf /etc/nginx/sites-available/
-COPY ./includes/nginx/fastcgi.conf /etc/nginx/
-COPY ./includes/nginx/nginx.conf /etc/nginx/
+COPY ./data/099-Custom.php /opt/099-Custom.php
+COPY ./data/php.ini /usr/local/etc/php/php.ini
+COPY ./data/opcache.blacklist /usr/local/etc/php/opcache.blacklist
+COPY ./data/my.cnf /etc/mysql/my.cnf
+COPY ./data/bluespice.cron /etc/cron.d/bluespice
+COPY ./data/install-scripts /opt/docker/install-scripts
+COPY ./data/pingback.js /opt/docker/
+COPY ./data/mysqld.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./data/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY ./data/nginx/bluespice.conf /etc/nginx/sites-available/
+COPY ./data/nginx/bluespice-ssl.conf /etc/nginx/sites-available/
+COPY ./data/nginx/fastcgi.conf /etc/nginx/
+COPY ./data/nginx/nginx.conf /etc/nginx/
 # the bluepice archive contains folder with name BlueSpice-free when extracted  
 COPY ./_codebase/build-free-4.4.x.tar.bz2 /opt/docker/pkg/BlueSpice-free.tar.bz2
-COPY ./includes/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2 /opt/docker/pkg/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2
+COPY ./data/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2 /opt/docker/pkg/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2
 
 RUN DEBIAN_FRONTEND="noninteractive" \
     apt-get update && \
@@ -55,9 +55,9 @@ RUN DEBIAN_FRONTEND="noninteractive" \
     && mkdir -p /opt/docker/pkg \
     && mkdir -p /opt/docker/bluespice-data/extensions/BluespiceFoundation \
     && mkdir -p /opt/docker/bluespice-data/settings.d \
-    && mkdir -p /includes \
+    && mkdir -p /data \
     && touch /opt/docker/.firstrun
 
 EXPOSE 80
-WORKDIR /includes
+WORKDIR /data
 ENTRYPOINT ["/opt/docker/install-scripts/init.sh"]
