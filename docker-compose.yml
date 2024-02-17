@@ -5,6 +5,6 @@ services:
     build:
       context: .
     ports:
-      - "81:80"
+      - "80:80"
     volumes:
       - ./dockerData:/data

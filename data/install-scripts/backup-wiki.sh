@@ -1,25 +1,18 @@
 #!/bin/bash
 
-echo "Old installation detected! Moving old installation to /data/backups/$date"
-/etc/init.d/memcached start >> /data/logs/wiki.logs 2>&1
-sleep 20
+echo "Old installation detected! Moving old installation to /data/backups/$CURR_TIMESTAMP"
+/etc/init.d/memcached start
+sleep 10
 chown -Rf mysql:mysql /data/mysql
-rm -Rf /var/lib/mysql >>/data/logs/wiki.logs 2>&1
-ln -s /data/mysql /var/lib/mysql >>/data/logs/wiki.logs 2>&1
-/etc/init.d/mysql start >> /data/logs/wiki.logs 2>&1
+rm -Rf /var/lib/mysql 
+ln -s /data/mysql /var/lib/mysql 
+/etc/init.d/mariadb start
 mkdir -p /data/backups/
-mv /data/www/bluespice /data/backups/$date
+mv /data/www/bluespice /data/backups/$CURR_TIMESTAMP
 
-if ! [ "$WIKI_BACKUP_LIMIT" -gt 0 ]; then
-    WIKI_BACKUP_LIMIT=5
+total_backups=$(find "$WIKI_BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l)
+if [ "$total_backups" -gt "$WIKI_BACKUP_LIMIT" ]; then
+    oldest_backup=$(find "$WIKI_BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -exec stat --format="%Y %n" {} + | sort -n | head -n 1 | awk '{print $2}')
+    rm -rf $oldest_backup
+    echo "Cleaned old backup $oldest_backup"
 fi
-
-WIKI_BACKUP_DIR="/data/www/backups"
-
-all_backups=($(find "$WIKI_BACKUP_DIR" -maxdepth 1 -type d -exec basename {} \;))
-
-if [ "${#all_backups[@]}" -gt "$WIKI_BACKUP_LIMIT" ]; then
-    all_backups=($(for dir in "${all_backups[@]}"; do echo "$dir"; done | sort))
-    rm -rf "$WIKI_BACKUP_DIR/${all_backups[0]}"
-fi
-# python3 $SCRIPT_DIR/backup-wiki-data.py $WIKI_BACKUP_LIMIT >>/data/logs/wiki.logs 2>&1

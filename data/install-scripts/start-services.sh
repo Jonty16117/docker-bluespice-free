@@ -1,35 +1,33 @@
 #!/bin/bash
 
-# Force restarting opensearch service
-echo "Restarting opensearch service"
-pkill -0 -u opensearch > /dev/null 2>&1 && pkill -u opensearch > /dev/null 2>&1
-su -s /bin/bash -c "/opt/opensearch/bin/opensearch &" opensearch # start opensearch
+echo "Starting opensearch service"
+pgrep -u opensearch > /dev/null && echo "The process opensearch is already running." || su -s /bin/bash -c "/opt/opensearch/bin/opensearch &" opensearch
 sleep 5
 
-# Start php-fpm service
-echo "Starting php-fpm"
+echo "Starting php-fpm service"
+pkill -0 php-fpm && pkill -9 php-fpm
+sleep 5
 php-fpm --daemonize
-
-# Start mysql service
-echo "Starting mysqld service"
-/etc/init.d/mysql start >>/data/logs/wiki.logs 2>&1
 sleep 5
 
-# Start memcached service
-/etc/init.d/memcached start >>/data/logs/wiki.logs 2>&1
+echo "Starting mariadb service"
+/etc/init.d/mariadb start 
+sleep 5
 
-# Start jetty9 service
-service jetty9 start >>/data/logs/wiki.logs 2>&1
+echo "Starting memcached service"
+/etc/init.d/memcached start 
 
-# Run bluspice scripts 
-echo "Starting bluspice"
-php /var/www/html/w/maintenance/update.php --quick >>/dev/stdout
-php /var/www/html/w/extensions/BlueSpiceExtendedSearch/maintenance/initBackends.php --quick >>/dev/stdout
-php /var/www/html/w/extensions/BlueSpiceExtendedSearch/maintenance/rebuildIndex.php --quick >>/dev/stdout
-php /var/www/html/w/maintenance/runJobs.php --memory-limit=max --maxjobs=50 >>/dev/stdout
+echo "Starting jetty service"
+JETTY_COMMAND="java -Xms512m -Xmx1024m -Djetty.home=127.0.0.1 -jar /opt/jetty9-runner.jar --port 8080 /opt/BShtml2PDF.war"
+if pgrep -f "$JETTY_COMMAND" > /dev/null; then
+    echo "jetty is already running."
+else
+    echo "Starting jetty..."
+    nohup $JETTY_COMMAND > /dev/null 2>&1 &
+fi
 
-# Todo
-/etc/init.d/cron start >>/data/logs/wiki.logs 2>&1
+echo "Starting cron service"
+/etc/init.d/cron start 
 
-# Finally run the docker container with the nginx process
+echo "Starting nginx service"
 service nginx start
