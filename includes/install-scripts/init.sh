@@ -81,4 +81,4 @@ source $START_SERVICES
 [ "$FRESH_INSTALL_FLAG" = false ] && source $UPDATE_WIKI
 
 echo "---=== [ READY! ] ===---" 
-tail -f /data/logs/wiki.logs
+exec nginx -g 'daemon off;'

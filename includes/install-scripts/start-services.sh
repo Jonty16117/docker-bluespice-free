@@ -29,5 +29,5 @@ fi
 echo "Starting cron service"
 /etc/init.d/cron start 
 
-echo "Starting nginx service"
-service nginx start
+# echo "Starting nginx service"
+# service nginx start
