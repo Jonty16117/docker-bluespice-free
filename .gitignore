@@ -9,4 +9,3 @@ bs_venv/
 wiki/
 _codebase/*
 !_codebase/.gitkeep
-./dockerData

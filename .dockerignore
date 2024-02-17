@@ -1,7 +1,6 @@
 .vscode
 runner
-bs_venv/
+bs_venv
 
 # add WIKI_INSTALL_DIR's value here also if this folder is inside the project directory
-wiki/
-./dockerData
+wiki

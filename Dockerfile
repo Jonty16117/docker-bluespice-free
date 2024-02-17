@@ -9,7 +9,7 @@ COPY ./data/php.ini /usr/local/etc/php/php.ini
 COPY ./data/opcache.blacklist /usr/local/etc/php/opcache.blacklist
 COPY ./data/my.cnf /etc/mysql/my.cnf
 COPY ./data/bluespice.cron /etc/cron.d/bluespice
-# COPY ./data/install-scripts /opt/docker/install-scripts
+COPY ./data/install-scripts /opt/docker/install-scripts
 COPY ./data/pingback.js /opt/docker/
 COPY ./data/mysqld.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY ./data/www.conf /usr/local/etc/php-fpm.d/www.conf
@@ -18,7 +18,7 @@ COPY ./data/nginx/bluespice-ssl.conf /etc/nginx/sites-available/
 COPY ./data/nginx/fastcgi.conf /etc/nginx/
 COPY ./data/nginx/nginx.conf /etc/nginx/
 # the bluepice archive contains folder with name BlueSpice-free when extracted  
-COPY ./data/build-free-4.4.x.tar.bz2 /opt/docker/pkg/BlueSpice-free.tar.bz2
+COPY ./_codebase/build-free-4.4.x.tar.bz2 /opt/docker/pkg/BlueSpice-free.tar.bz2
 COPY ./data/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2 /opt/docker/pkg/opensearch-min-no-jdk-with-plugin-2.11.1.tar.bz2
 
 RUN DEBIAN_FRONTEND="noninteractive" \
@@ -35,9 +35,8 @@ RUN DEBIAN_FRONTEND="noninteractive" \
     logrotate \
     nodejs \
     nginx \
-    default-mysql-server
-
-RUN curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - | sh -s gd zip mysqli ldap opcache apcu intl && \
+    default-mysql-server && \
+    curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - | sh -s gd zip mysqli ldap opcache apcu intl && \
     # download essential packages
     cd /opt/docker && \
     wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-runner/9.4.43.v20210629/jetty-runner-9.4.43.v20210629.jar && \
@@ -51,11 +50,8 @@ RUN curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases
     rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/nginx/sites-available/default && \
     rm -f /etc/nginx/sites-enabled/default && \
-    find /usr/local/etc/php-fpm.d/ -type f ! -name 'www.conf' -exec rm -f {} +
-
-# move this to top in production (or maybe not)
-COPY ./data/install-scripts /opt/docker/install-scripts
-RUN chmod a+x /opt/docker/install-scripts/*.sh \
+    find /usr/local/etc/php-fpm.d/ -type f ! -name 'www.conf' -exec rm -f {} + && \
+    chmod a+x /opt/docker/install-scripts/*.sh \
     && mkdir -p /opt/docker/pkg \
     && mkdir -p /opt/docker/bluespice-data/extensions/BluespiceFoundation \
     && mkdir -p /opt/docker/bluespice-data/settings.d \
@@ -65,4 +61,3 @@ RUN chmod a+x /opt/docker/install-scripts/*.sh \
 EXPOSE 80
 WORKDIR /data
 ENTRYPOINT ["/opt/docker/install-scripts/init.sh"]
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
